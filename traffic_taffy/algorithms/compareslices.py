@@ -7,7 +7,7 @@ import itertools
 import datetime as dt
 from pathlib import Path
 
-from logging import debug, error, exception
+from logging import debug, error
 
 if TYPE_CHECKING:
     from traffic_taffy.dissection import Dissection
@@ -55,7 +55,8 @@ class ComparisonSlicesAlgorithm(ComparisonAlgorithm):
             other = next(dissections)
             dissections = itertools.chain([other], dissections)
         except Exception:
-            exception("failed to create a chain of dissections")
+            # not realllllyyyy an error....  (was error, now debug)
+            debug("failed to create a chain of dissections")
             multiple = False
 
         if multiple:
