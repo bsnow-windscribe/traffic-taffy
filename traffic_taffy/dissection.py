@@ -57,7 +57,7 @@ class Dissection:
         pcap_file: str,
         pcap_filter: str | None = None,
         maximum_count: int = 0,
-        bin_size: int = 0,
+        bin_size: float = 0,
         dissector_level: PCAPDissectorLevel = PCAPDissectorLevel.DETAILED,
         cache_file_suffix: str = "taffy",
         ignore_list: list | None = None,

@@ -19,7 +19,7 @@ Option                  Description
                         more useless fields like TCP sequence numbers,
                         eg.  See the --help output for a default list.
   -n PACKET_COUNT       Maximum number of packets to analyze (default: 0)
-  -b BIN_SIZE           Time-bin the results into this many seconds (default: 1)
+  -b BIN_SIZE           Time-bin the results into this many seconds, which may be fractional (default: 1)
   -F FILTER             tcpdump/libpcap filter to apply to the pcap
                         file when processing (default: None)
   -L [LAYERS ...]       List of extra layers to load (eg: tls, http, etc).

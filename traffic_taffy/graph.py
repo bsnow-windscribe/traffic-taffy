@@ -100,7 +100,7 @@ class PcapGraph(PcapGraphData):
         bin_size = self.bin_size
         if not bin_size:
             bin_size = 1
-        freq = str(bin_size) + "s"
+        freq = f"{bin_size}s"
 
         # Ensure time is datetime and snap to the bin start
         df["time"] = pd.to_datetime(df["time"]).dt.floor(freq)

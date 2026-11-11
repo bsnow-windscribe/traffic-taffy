@@ -1,5 +1,7 @@
 """Base class for a dissection engine with subclasses overriding load()"""
 
+import math
+
 from traffic_taffy.dissection import Dissection, PCAPDissectorLevel
 from typing import List
 
@@ -10,7 +12,7 @@ class DissectionEngine:
         pcap_file,
         pcap_filter: str = "",
         maximum_count: int = 0,
-        bin_size: int = 0,
+        bin_size: float = 0,
         dissector_level: PCAPDissectorLevel = PCAPDissectorLevel.COMMON_LAYERS,
         cache_file_suffix: str = "pkl",
         ignore_list: list = [],
@@ -26,17 +28,25 @@ class DissectionEngine:
         self.layers = layers
 
     def start_packet(
-        self, timestamp: int, dissection: Dissection | None = None
+        self, timestamp: float, dissection: Dissection | None = None
     ) -> None:
         if not dissection:
             dissection = self.dissection
 
         # set and bin-ize the timestamp
-        dissection.timestamp = int(timestamp)
-        if dissection.bin_size:
-            dissection.timestamp = (
-                dissection.timestamp - dissection.timestamp % dissection.bin_size
+        bin_size = dissection.bin_size
+        if bin_size and bin_size != int(bin_size):
+            # fractional bin sizes: keep sub-second precision, and round
+            # away floating point noise (eg, 0.30000000000000004)
+            dissection.timestamp = round(
+                math.floor(float(timestamp) / bin_size) * bin_size, 6
             )
+        else:
+            dissection.timestamp = int(timestamp)
+            if bin_size:
+                dissection.timestamp = (
+                    dissection.timestamp - dissection.timestamp % int(bin_size)
+                )
 
         # increment the base counter for all packets
         dissection.incr(Dissection.TOTAL_COUNT, dissection.TOTAL_SUBKEY)

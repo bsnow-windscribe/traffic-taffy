@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import argparse
+import math
 import sys
 from collections import Counter, defaultdict
 from logging import error, warning, debug
@@ -49,6 +51,19 @@ class TTL_CFG:
 
 POST_DISSECT_HOOK: str = "post_dissect"
 INIT_HOOK: str = "init_hooks"
+
+
+def bin_size_type(value: str) -> int | float:
+    """Parse a bin size in seconds: integers stay integers, others are floats."""
+    try:
+        number = float(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(f"invalid bin size: {value!r}") from exc
+    if not math.isfinite(number) or number < 0:
+        raise argparse.ArgumentTypeError(
+            f"bin size must be a non-negative number: {value!r}"
+        )
+    return int(number) if number == int(number) else number
 
 
 def dissector_default(name: str, value: Any) -> None:
@@ -348,8 +363,8 @@ def dissector_add_parseargs(
         "--bin-size",
         config_path=TTD_CFG.BIN_SIZE,
         default=dissection_config[TTD_CFG.BIN_SIZE],
-        type=int,
-        help="Bin results into this many seconds",
+        type=bin_size_type,
+        help="Bin results into this many seconds (may be fractional, eg 0.5)",
     )
 
     parser.add_argument(

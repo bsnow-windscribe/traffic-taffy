@@ -127,7 +127,7 @@ class DissectionEngineScapy(DissectionEngine):
     def callback(self, packet) -> None:
         """Handle one packet to dissect."""
         prefix = "_"
-        self.start_packet(int(packet.time))
+        self.start_packet(float(packet.time))
 
         for payload in packet.iterpayloads():
             # don't allow double-wording

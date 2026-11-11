@@ -142,7 +142,7 @@ class DissectionEngineDpkt(DissectionEngine):
         # if binning is requested, save it in a binned time slot
         dissection: Dissection = self.dissection
 
-        self.start_packet(int(timestamp), dissection)
+        self.start_packet(timestamp, dissection)
 
         level = self.dissector_level
         if isinstance(level, PCAPDissectorLevel):
