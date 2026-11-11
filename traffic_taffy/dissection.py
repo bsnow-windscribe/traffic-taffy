@@ -14,6 +14,18 @@ from traffic_taffy import __VERSION__ as VERSION
 from io import BytesIO
 import pkgutil
 
+def _hashable(value: Any) -> Any:
+    """Recursively convert msgpack arrays (lists) into hashable tuples."""
+    if isinstance(value, list):
+        return tuple(_hashable(item) for item in value)
+    return value
+
+
+def _pairs_to_dict(pairs: list) -> dict:
+    """msgpack object_pairs_hook that allows array-valued dictionary keys."""
+    return {_hashable(key): value for key, value in pairs}
+
+
 # TODO(hardaker): fix to not use a global
 # note that this is designed to load only once before forking
 iana_data = None
@@ -339,7 +351,19 @@ class Dissection:
     ) -> dict:
         """Load a saved report from a cache file."""
         with Path(where).open("rb") as cache_file:
-            contents = msgpack.load(cache_file, strict_map_key=False)
+            try:
+                contents = msgpack.load(cache_file, strict_map_key=False)
+            except TypeError:
+                # Some values (eg, DNS TXT record details) are tuples that
+                # were saved as msgpack arrays and used as dictionary keys.
+                # Python lists can't be dictionary keys, so reload turning
+                # array keys back into (hashable) tuples.
+                cache_file.seek(0)
+                contents = msgpack.load(
+                    cache_file,
+                    strict_map_key=False,
+                    object_pairs_hook=_pairs_to_dict,
+                )
 
         # convert the ignore list to a set (msgpack doesn't do sets)
         contents["parameters"]["ignore_list"] = set(
